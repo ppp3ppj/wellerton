@@ -7,7 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun PinCodeScreen(
@@ -16,66 +16,48 @@ fun PinCodeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState) {
-        if (uiState is PinCodeUiState.Success) onSuccess()
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) onSuccess()
     }
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        when (val state = uiState) {
-            is PinCodeUiState.Loading -> CircularProgressIndicator()
-            is PinCodeUiState.Create -> PinEntryContent(
-                title = if (state.confirm.isEmpty()) "Create PIN" else "Confirm PIN",
-                pinLength = if (state.confirm.isEmpty()) state.pin.length else state.confirm.length,
-                error = state.error,
-                onDigit = viewModel::onPinEntered,
-                onDelete = viewModel::onDelete
-            )
-            is PinCodeUiState.Verify -> PinEntryContent(
-                title = "Enter PIN",
-                pinLength = state.pin.length,
-                error = state.error,
-                onDigit = viewModel::onPinEntered,
-                onDelete = viewModel::onDelete
-            )
-            is PinCodeUiState.Success -> Unit
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text("Welcome", style = MaterialTheme.typography.headlineMedium)
+
+            if (uiState.username.isNotEmpty()) {
+                Text(
+                    text = uiState.username,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Text("Enter your PIN", style = MaterialTheme.typography.bodyMedium)
+
+            PinDots(filled = uiState.pin.length, total = 6)
+
+            uiState.error?.let {
+                Text(text = it, color = MaterialTheme.colorScheme.error)
+            }
+
+            PinPad(onDigit = viewModel::onPinDigit, onDelete = viewModel::onDelete)
         }
     }
 }
 
 @Composable
-private fun PinEntryContent(
-    title: String,
-    pinLength: Int,
-    error: String?,
-    onDigit: (String) -> Unit,
-    onDelete: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        modifier = Modifier.padding(32.dp)
-    ) {
-        Text(text = title, style = MaterialTheme.typography.headlineMedium)
-
-        PinDots(filled = pinLength)
-
-        if (error != null) {
-            Text(text = error, color = MaterialTheme.colorScheme.error)
-        }
-
-        PinPad(onDigit = onDigit, onDelete = onDelete)
-    }
-}
-
-@Composable
-private fun PinDots(filled: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        repeat(4) { index ->
+private fun PinDots(filled: Int, total: Int) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        repeat(total) { index ->
             Surface(
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(14.dp),
                 shape = MaterialTheme.shapes.small,
                 color = if (index < filled) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.outlineVariant

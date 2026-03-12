@@ -3,9 +3,9 @@ package com.ppp3ppj.wellerton.di
 import android.content.Context
 import androidx.room.Room
 import com.ppp3ppj.wellerton.data.local.AppDatabase
-import com.ppp3ppj.wellerton.data.local.dao.PinDao
-import com.ppp3ppj.wellerton.data.repository.PinRepository
-import com.ppp3ppj.wellerton.data.repository.PinRepositoryImpl
+import com.ppp3ppj.wellerton.data.local.dao.UserDao
+import com.ppp3ppj.wellerton.data.repository.UserRepository
+import com.ppp3ppj.wellerton.data.repository.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,10 +21,13 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
-        Room.databaseBuilder(context, AppDatabase::class.java, "wellerton.db").build()
+        Room.databaseBuilder(context, AppDatabase::class.java, "wellerton.db")
+            .addCallback(AppDatabase.seedCallback)
+            .fallbackToDestructiveMigration(true)
+            .build()
 
     @Provides
-    fun providePinDao(db: AppDatabase): PinDao = db.pinDao()
+    fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
 }
 
 @Module
@@ -33,5 +36,5 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindPinRepository(impl: PinRepositoryImpl): PinRepository
+    abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
 }
