@@ -11,13 +11,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 
 @Composable
 fun PinCodeScreen(
-    onSuccess: () -> Unit,
+    onSuccess: (username: String) -> Unit,
     viewModel: PinCodeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) onSuccess()
+        if (uiState.isSuccess) onSuccess(uiState.username)
     }
 
     Box(
@@ -29,17 +29,7 @@ fun PinCodeScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.padding(32.dp)
         ) {
-            Text("Welcome", style = MaterialTheme.typography.headlineMedium)
-
-            if (uiState.username.isNotEmpty()) {
-                Text(
-                    text = uiState.username,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Text("Enter your PIN", style = MaterialTheme.typography.bodyMedium)
+            Text("Enter PIN", style = MaterialTheme.typography.headlineMedium)
 
             PinDots(filled = uiState.pin.length, total = 6)
 
