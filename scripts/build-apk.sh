@@ -41,21 +41,53 @@ EOF
   fi
 }
 
+check_prod_env() {
+  local missing=()
+  [ -z "$SIGNING_STORE_FILE" ]     && missing+=("SIGNING_STORE_FILE")
+  [ -z "$SIGNING_STORE_PASSWORD" ] && missing+=("SIGNING_STORE_PASSWORD")
+  [ -z "$SIGNING_KEY_ALIAS" ]      && missing+=("SIGNING_KEY_ALIAS")
+  [ -z "$SIGNING_KEY_PASSWORD" ]   && missing+=("SIGNING_KEY_PASSWORD")
+  if [ ${#missing[@]} -gt 0 ]; then
+    echo "ERROR: Missing required env vars for prod build:"
+    printf '  %s\n' "${missing[@]}"
+    exit 1
+  fi
+  if [ ! -f "$SIGNING_STORE_FILE" ]; then
+    echo "ERROR: Keystore file not found: $SIGNING_STORE_FILE"
+    exit 1
+  fi
+}
+
 # --- main ---
-BUILD_TYPE="${1:-release}"  # default: release, pass "debug" for unsigned
+# Usage: build-apk.sh [release|debug|prod]
+BUILD_TYPE="${1:-release}"
 
 chmod +x "$ROOT_DIR/gradlew"
 
-if [ "$BUILD_TYPE" = "release" ]; then
-  [ -f "$KEYSTORE_PATH" ] || generate_keystore
-  write_local_properties
-  echo "Building signed release APK..."
-  "$ROOT_DIR/gradlew" assembleRelease
-  echo ""
-  echo "APK: app/build/outputs/apk/release/app-release.apk"
-else
-  echo "Building unsigned debug APK..."
-  "$ROOT_DIR/gradlew" assembleDebug
-  echo ""
-  echo "APK: app/build/outputs/apk/debug/app-debug.apk"
-fi
+case "$BUILD_TYPE" in
+  prod)
+    check_prod_env
+    echo "Building production signed release APK..."
+    "$ROOT_DIR/gradlew" assembleRelease
+    echo ""
+    echo "APK: app/build/outputs/apk/release/app-release.apk"
+    ;;
+  release)
+    [ -f "$KEYSTORE_PATH" ] || generate_keystore
+    write_local_properties
+    echo "Building test signed release APK..."
+    "$ROOT_DIR/gradlew" assembleRelease
+    echo ""
+    echo "APK: app/build/outputs/apk/release/app-release.apk"
+    ;;
+  debug)
+    echo "Building unsigned debug APK..."
+    "$ROOT_DIR/gradlew" assembleDebug
+    echo ""
+    echo "APK: app/build/outputs/apk/debug/app-debug.apk"
+    ;;
+  *)
+    echo "Usage: $0 [release|debug|prod]"
+    exit 1
+    ;;
+esac

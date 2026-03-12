@@ -1,5 +1,5 @@
 param(
-    [string]$BuildType = "release"
+    [string]$BuildType = "release"  # release | debug | prod
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,16 +43,46 @@ function Write-SigningProps {
     Write-Host "Signing config written to local.properties"
 }
 
-if ($BuildType -eq "release") {
-    if (-not (Test-Path $KeystorePath)) { Generate-Keystore }
-    Write-SigningProps
-    Write-Host "Building signed release APK..."
-    & "$RootDir\gradlew.bat" assembleRelease
-    Write-Host ""
-    Write-Host "APK: app\build\outputs\apk\release\app-release.apk"
-} else {
-    Write-Host "Building unsigned debug APK..."
-    & "$RootDir\gradlew.bat" assembleDebug
-    Write-Host ""
-    Write-Host "APK: app\build\outputs\apk\debug\app-debug.apk"
+function Assert-ProdEnv {
+    $missing = @()
+    if (-not $env:SIGNING_STORE_FILE)     { $missing += "SIGNING_STORE_FILE" }
+    if (-not $env:SIGNING_STORE_PASSWORD) { $missing += "SIGNING_STORE_PASSWORD" }
+    if (-not $env:SIGNING_KEY_ALIAS)      { $missing += "SIGNING_KEY_ALIAS" }
+    if (-not $env:SIGNING_KEY_PASSWORD)   { $missing += "SIGNING_KEY_PASSWORD" }
+    if ($missing.Count -gt 0) {
+        Write-Error "Missing required env vars for prod build:`n  $($missing -join "`n  ")"
+        exit 1
+    }
+    if (-not (Test-Path $env:SIGNING_STORE_FILE)) {
+        Write-Error "Keystore file not found: $env:SIGNING_STORE_FILE"
+        exit 1
+    }
+}
+
+switch ($BuildType) {
+    "prod" {
+        Assert-ProdEnv
+        Write-Host "Building production signed release APK..."
+        & "$RootDir\gradlew.bat" assembleRelease
+        Write-Host ""
+        Write-Host "APK: app\build\outputs\apk\release\app-release.apk"
+    }
+    "release" {
+        if (-not (Test-Path $KeystorePath)) { Generate-Keystore }
+        Write-SigningProps
+        Write-Host "Building test signed release APK..."
+        & "$RootDir\gradlew.bat" assembleRelease
+        Write-Host ""
+        Write-Host "APK: app\build\outputs\apk\release\app-release.apk"
+    }
+    "debug" {
+        Write-Host "Building unsigned debug APK..."
+        & "$RootDir\gradlew.bat" assembleDebug
+        Write-Host ""
+        Write-Host "APK: app\build\outputs\apk\debug\app-debug.apk"
+    }
+    default {
+        Write-Error "Usage: build-apk.ps1 -BuildType [release|debug|prod]"
+        exit 1
+    }
 }

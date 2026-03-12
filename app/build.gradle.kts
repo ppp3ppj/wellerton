@@ -26,13 +26,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Env vars (prod CI) take priority over local.properties (test/local)
+    val signingStore = System.getenv("SIGNING_STORE_FILE")     ?: localProps["signing.storeFile"] as? String
+    val signingStorePw = System.getenv("SIGNING_STORE_PASSWORD") ?: localProps["signing.storePassword"] as? String
+    val signingAlias = System.getenv("SIGNING_KEY_ALIAS")      ?: localProps["signing.keyAlias"] as? String
+    val signingKeyPw = System.getenv("SIGNING_KEY_PASSWORD")   ?: localProps["signing.keyPassword"] as? String
+
     signingConfigs {
-        if (localProps.containsKey("signing.storeFile")) {
+        if (signingStore != null) {
             create("release") {
-                storeFile = file(localProps["signing.storeFile"] as String)
-                storePassword = localProps["signing.storePassword"] as String
-                keyAlias = localProps["signing.keyAlias"] as String
-                keyPassword = localProps["signing.keyPassword"] as String
+                storeFile = file(signingStore)
+                storePassword = signingStorePw
+                keyAlias = signingAlias
+                keyPassword = signingKeyPw
             }
         }
     }
