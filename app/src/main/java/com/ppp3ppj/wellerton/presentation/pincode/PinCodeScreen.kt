@@ -16,8 +16,8 @@ fun PinCodeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.isSuccess) {
-        if (uiState.isSuccess) onSuccess(uiState.username)
+    LaunchedEffect(uiState.loggedInUsername) {
+        uiState.loggedInUsername?.let { onSuccess(it) }
     }
 
     Box(

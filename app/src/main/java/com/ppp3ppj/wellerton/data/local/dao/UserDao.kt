@@ -11,12 +11,9 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(user: UserEntity)
 
-    @Query("SELECT * FROM users WHERE name = :name LIMIT 1")
-    suspend fun findByName(name: String): UserEntity?
+    @Query("SELECT * FROM users WHERE pin_hash = :pinHash LIMIT 1")
+    suspend fun findByPinHash(pinHash: String): UserEntity?
 
     @Query("SELECT COUNT(*) FROM users")
     suspend fun count(): Int
-
-    @Query("SELECT * FROM users LIMIT 1")
-    suspend fun getFirst(): UserEntity?
 }

@@ -11,10 +11,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PinCodeUiState(
-    val username: String = "",
     val pin: String = "",
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val loggedInUsername: String? = null
 )
 
 @HiltViewModel
@@ -25,29 +24,21 @@ class PinCodeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PinCodeUiState())
     val uiState: StateFlow<PinCodeUiState> = _uiState
 
-    init {
-        viewModelScope.launch {
-            val name = userRepository.getCurrentUsername() ?: ""
-            _uiState.update { it.copy(username = name) }
-        }
-    }
-
     fun onPinDigit(digit: String) {
-        val state = _uiState.value
-        val newPin = (state.pin + digit).take(6)
+        val newPin = (_uiState.value.pin + digit).take(6)
         _uiState.update { it.copy(pin = newPin, error = null) }
-        if (newPin.length == 6) verify()
+        if (newPin.length == 6) verify(newPin)
     }
 
     fun onDelete() {
         _uiState.update { it.copy(pin = it.pin.dropLast(1)) }
     }
 
-    private fun verify() {
-        val state = _uiState.value
+    private fun verify(pin: String) {
         viewModelScope.launch {
-            if (userRepository.verifyPin(state.username, state.pin)) {
-                _uiState.update { it.copy(isSuccess = true) }
+            val username = userRepository.findUserByPin(pin)
+            if (username != null) {
+                _uiState.update { it.copy(loggedInUsername = username) }
             } else {
                 _uiState.update { it.copy(pin = "", error = "Incorrect PIN") }
             }

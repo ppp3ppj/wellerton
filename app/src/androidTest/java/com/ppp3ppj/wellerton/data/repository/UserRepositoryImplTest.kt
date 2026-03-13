@@ -8,9 +8,7 @@ import com.ppp3ppj.wellerton.data.local.entity.UserEntity
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,31 +35,28 @@ class UserRepositoryImplTest {
     }
 
     @Test
-    fun getCurrentUsername_emptyDb_returnsNull() = runTest {
-        assertNull(repository.getCurrentUsername())
+    fun findUserByPin_emptyDb_returnsNull() = runTest {
+        assertNull(repository.findUserByPin("000000"))
     }
 
     @Test
-    fun getCurrentUsername_returnsFirstUserName() = runTest {
+    fun findUserByPin_correctPin_returnsUsername() = runTest {
         db.userDao().insert(UserEntity(name = "admin", pinHash = sha256("000000")))
-        assertEquals("admin", repository.getCurrentUsername())
+        assertEquals("admin", repository.findUserByPin("000000"))
     }
 
     @Test
-    fun verifyPin_correctPin_returnsTrue() = runTest {
+    fun findUserByPin_wrongPin_returnsNull() = runTest {
         db.userDao().insert(UserEntity(name = "admin", pinHash = sha256("000000")))
-        assertTrue(repository.verifyPin("admin", "000000"))
+        assertNull(repository.findUserByPin("123456"))
     }
 
     @Test
-    fun verifyPin_wrongPin_returnsFalse() = runTest {
+    fun findUserByPin_multipleUsers_returnsCorrectOne() = runTest {
         db.userDao().insert(UserEntity(name = "admin", pinHash = sha256("000000")))
-        assertFalse(repository.verifyPin("admin", "123456"))
-    }
-
-    @Test
-    fun verifyPin_unknownUser_returnsFalse() = runTest {
-        assertFalse(repository.verifyPin("nobody", "000000"))
+        db.userDao().insert(UserEntity(name = "alice", pinHash = sha256("111111")))
+        assertEquals("alice", repository.findUserByPin("111111"))
+        assertEquals("admin", repository.findUserByPin("000000"))
     }
 
     private fun sha256(input: String): String {

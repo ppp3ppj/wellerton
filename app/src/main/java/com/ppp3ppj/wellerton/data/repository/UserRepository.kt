@@ -1,6 +1,6 @@
 package com.ppp3ppj.wellerton.data.repository
 
 interface UserRepository {
-    suspend fun getCurrentUsername(): String?
-    suspend fun verifyPin(username: String, pin: String): Boolean
+    /** Returns the username of the user whose PIN matches, or null if no match. */
+    suspend fun findUserByPin(pin: String): String?
 }

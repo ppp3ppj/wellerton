@@ -45,9 +45,8 @@ class PinCodeScreenTest {
     // --- Fake repository ---
 
     class FakeUserRepository @Inject constructor() : UserRepository {
-        override suspend fun getCurrentUsername(): String = "admin"
-        override suspend fun verifyPin(username: String, pin: String): Boolean =
-            username == "admin" && pin == "000000"
+        override suspend fun findUserByPin(pin: String): String? =
+            if (pin == "000000") "admin" else null
     }
 
     @Module

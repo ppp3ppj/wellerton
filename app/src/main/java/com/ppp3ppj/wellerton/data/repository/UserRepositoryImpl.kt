@@ -8,12 +8,8 @@ class UserRepositoryImpl @Inject constructor(
     private val userDao: UserDao
 ) : UserRepository {
 
-    override suspend fun getCurrentUsername(): String? = userDao.getFirst()?.name
-
-    override suspend fun verifyPin(username: String, pin: String): Boolean {
-        val user = userDao.findByName(username) ?: return false
-        return user.pinHash == pin.sha256()
-    }
+    override suspend fun findUserByPin(pin: String): String? =
+        userDao.findByPinHash(pin.sha256())?.name
 
     private fun String.sha256(): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(toByteArray())
