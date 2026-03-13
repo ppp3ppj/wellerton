@@ -3,7 +3,10 @@ package com.ppp3ppj.wellerton.di
 import android.content.Context
 import androidx.room.Room
 import com.ppp3ppj.wellerton.data.local.AppDatabase
+import com.ppp3ppj.wellerton.data.local.dao.HealthLogDao
 import com.ppp3ppj.wellerton.data.local.dao.UserDao
+import com.ppp3ppj.wellerton.data.repository.HealthLogRepository
+import com.ppp3ppj.wellerton.data.repository.HealthLogRepositoryImpl
 import com.ppp3ppj.wellerton.data.repository.UserRepository
 import com.ppp3ppj.wellerton.data.repository.UserRepositoryImpl
 import dagger.Binds
@@ -28,6 +31,9 @@ object DatabaseModule {
 
     @Provides
     fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+
+    @Provides
+    fun provideHealthLogDao(db: AppDatabase): HealthLogDao = db.healthLogDao()
 }
 
 @Module
@@ -37,4 +43,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUserRepository(impl: UserRepositoryImpl): UserRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHealthLogRepository(impl: HealthLogRepositoryImpl): HealthLogRepository
 }
