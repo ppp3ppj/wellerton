@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeScreen(username: String, onLogout: () -> Unit) {
+fun HomeScreen(username: String, onLogout: () -> Unit, onNavigateToHealthLog: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -23,6 +23,10 @@ fun HomeScreen(username: String, onLogout: () -> Unit) {
         Text("Welcome", style = MaterialTheme.typography.headlineSmall)
         Text(username, style = MaterialTheme.typography.headlineLarge)
         Spacer(modifier = Modifier.height(32.dp))
+        Button(onClick = onNavigateToHealthLog) {
+            Text("Daily Health Log")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = onLogout) {
             Text("Logout")
         }

@@ -16,7 +16,7 @@ class HomeScreenTest {
     @Test
     fun displaysWelcomeAndUsername() {
         composeTestRule.setContent {
-            HomeScreen(username = "admin", onLogout = {})
+            HomeScreen(username = "admin", onLogout = {}, onNavigateToHealthLog = {})
         }
         composeTestRule.onNodeWithText("Welcome").assertIsDisplayed()
         composeTestRule.onNodeWithText("admin").assertIsDisplayed()
@@ -25,7 +25,7 @@ class HomeScreenTest {
     @Test
     fun displaysLogoutButton() {
         composeTestRule.setContent {
-            HomeScreen(username = "admin", onLogout = {})
+            HomeScreen(username = "admin", onLogout = {}, onNavigateToHealthLog = {})
         }
         composeTestRule.onNodeWithText("Logout").assertIsDisplayed()
     }
@@ -34,9 +34,19 @@ class HomeScreenTest {
     fun logoutButton_invokesCallback() {
         var logoutCalled = false
         composeTestRule.setContent {
-            HomeScreen(username = "admin", onLogout = { logoutCalled = true })
+            HomeScreen(username = "admin", onLogout = { logoutCalled = true }, onNavigateToHealthLog = {})
         }
         composeTestRule.onNodeWithText("Logout").performClick()
         assertTrue(logoutCalled)
+    }
+
+    @Test
+    fun dailyHealthLogButton_invokesCallback() {
+        var navigateCalled = false
+        composeTestRule.setContent {
+            HomeScreen(username = "admin", onLogout = {}, onNavigateToHealthLog = { navigateCalled = true })
+        }
+        composeTestRule.onNodeWithText("Daily Health Log").performClick()
+        assertTrue(navigateCalled)
     }
 }
