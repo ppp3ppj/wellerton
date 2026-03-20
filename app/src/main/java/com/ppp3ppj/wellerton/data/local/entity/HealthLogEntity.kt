@@ -10,5 +10,6 @@ data class HealthLogEntity(
     val timeMinutes: Int,
     val activity: String,
     val status: HealthLogStatus = HealthLogStatus.UNRATED,
-    val type: HealthLogActivityType = HealthLogActivityType.OTHER
+    val type: HealthLogActivityType = HealthLogActivityType.OTHER,
+    val note: String = ""
 )

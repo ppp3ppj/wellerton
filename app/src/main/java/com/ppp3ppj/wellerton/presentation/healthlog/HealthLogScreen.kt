@@ -172,6 +172,14 @@ private fun HealthLogCard(
                 )
             }
 
+            if (log.note.isNotBlank()) {
+                Text(
+                    text = log.note,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically

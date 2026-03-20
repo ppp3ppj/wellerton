@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ppp3ppj.wellerton.MainActivity
+import com.ppp3ppj.wellerton.data.local.entity.HealthLogEntity
+import com.ppp3ppj.wellerton.data.repository.HealthLogRepository
 import com.ppp3ppj.wellerton.data.repository.UserRepository
 import com.ppp3ppj.wellerton.di.RepositoryModule
 import dagger.Binds
@@ -16,6 +18,8 @@ import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -42,11 +46,19 @@ class PinCodeScreenTest {
         hiltRule.inject()
     }
 
-    // --- Fake repository ---
+    // --- Fake repositories ---
 
     class FakeUserRepository @Inject constructor() : UserRepository {
         override suspend fun findUserByPin(pin: String): String? =
             if (pin == "000000") "admin" else null
+    }
+
+    class FakeHealthLogRepository @Inject constructor() : HealthLogRepository {
+        override fun getLogsForDate(date: String): Flow<List<HealthLogEntity>> = flowOf(emptyList())
+        override suspend fun getLogById(id: Int): HealthLogEntity? = null
+        override suspend fun addLog(log: HealthLogEntity) = Unit
+        override suspend fun updateLog(log: HealthLogEntity) = Unit
+        override suspend fun deleteLog(log: HealthLogEntity) = Unit
     }
 
     @Module
@@ -55,6 +67,10 @@ class PinCodeScreenTest {
         @Binds
         @Singleton
         abstract fun bindUserRepository(impl: FakeUserRepository): UserRepository
+
+        @Binds
+        @Singleton
+        abstract fun bindHealthLogRepository(impl: FakeHealthLogRepository): HealthLogRepository
     }
 
     // --- Tests ---
@@ -66,7 +82,6 @@ class PinCodeScreenTest {
 
     @Test
     fun showsSixDots() {
-        // Six dot indicators rendered as empty Surface nodes — verify via digit buttons presence
         composeTestRule.onNodeWithText("1").assertIsDisplayed()
         composeTestRule.onNodeWithText("2").assertIsDisplayed()
         composeTestRule.onNodeWithText("0").assertIsDisplayed()
@@ -77,7 +92,6 @@ class PinCodeScreenTest {
         composeTestRule.onNodeWithText("1").performClick()
         composeTestRule.onNodeWithText("2").performClick()
         composeTestRule.onNodeWithText("3").performClick()
-        // No error should appear for partial entry
         composeTestRule.onAllNodesWithText("Incorrect PIN").fetchSemanticsNodes().let {
             assert(it.isEmpty()) { "Expected no error message" }
         }
@@ -85,7 +99,6 @@ class PinCodeScreenTest {
 
     @Test
     fun correctPin_navigatesToHomeScreen() {
-        // admin PIN is 000000
         repeat(6) {
             composeTestRule.onNodeWithText("0").performClick()
         }
@@ -98,7 +111,6 @@ class PinCodeScreenTest {
 
     @Test
     fun wrongPin_showsErrorMessage() {
-        // Enter 6 wrong digits
         repeat(6) {
             composeTestRule.onNodeWithText("1").performClick()
         }
@@ -113,7 +125,6 @@ class PinCodeScreenTest {
         composeTestRule.onNodeWithText("1").performClick()
         composeTestRule.onNodeWithText("2").performClick()
         composeTestRule.onNodeWithText("⌫").performClick()
-        // After delete, only 1 digit remains — error not triggered, Enter PIN still shown
         composeTestRule.onNodeWithText("Enter PIN").assertIsDisplayed()
     }
 }

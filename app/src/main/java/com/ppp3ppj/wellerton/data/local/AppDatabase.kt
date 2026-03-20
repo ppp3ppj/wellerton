@@ -10,7 +10,7 @@ import com.ppp3ppj.wellerton.data.local.entity.HealthLogEntity
 import com.ppp3ppj.wellerton.data.local.entity.UserEntity
 import java.security.MessageDigest
 
-@Database(entities = [UserEntity::class, HealthLogEntity::class], version = 3, exportSchema = false)
+@Database(entities = [UserEntity::class, HealthLogEntity::class], version = 4, exportSchema = false)
 @TypeConverters(HealthLogTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao

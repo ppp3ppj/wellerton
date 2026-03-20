@@ -22,6 +22,7 @@ data class HealthLogFormUiState(
     val draftActivity: String = "",
     val draftStatus: HealthLogStatus = HealthLogStatus.UNRATED,
     val draftType: HealthLogActivityType = HealthLogActivityType.OTHER,
+    val draftNote: String = "",
     val isSaved: Boolean = false
 )
 
@@ -51,7 +52,8 @@ class HealthLogFormViewModel @Inject constructor(
                             draftTimeMinute = log.timeMinutes % 60,
                             draftActivity = log.activity,
                             draftStatus = log.status,
-                            draftType = log.type
+                            draftType = log.type,
+                            draftNote = log.note
                         )
                     }
                 }
@@ -76,6 +78,10 @@ class HealthLogFormViewModel @Inject constructor(
         _uiState.update { it.copy(draftActivity = text) }
     }
 
+    fun onNoteChange(text: String) {
+        _uiState.update { it.copy(draftNote = text) }
+    }
+
     fun onStatusChange(status: HealthLogStatus) {
         _uiState.update { it.copy(draftStatus = status) }
     }
@@ -91,7 +97,8 @@ class HealthLogFormViewModel @Inject constructor(
                         timeMinutes = timeMinutes,
                         activity = state.draftActivity.trim(),
                         status = state.draftStatus,
-                        type = state.draftType
+                        type = state.draftType,
+                        note = state.draftNote.trim()
                     )
                 )
             } else {
@@ -101,7 +108,8 @@ class HealthLogFormViewModel @Inject constructor(
                         timeMinutes = timeMinutes,
                         activity = state.draftActivity.trim(),
                         status = state.draftStatus,
-                        type = state.draftType
+                        type = state.draftType,
+                        note = state.draftNote.trim()
                     )
                 )
             }

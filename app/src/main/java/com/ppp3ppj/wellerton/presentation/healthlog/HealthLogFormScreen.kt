@@ -141,6 +141,16 @@ fun HealthLogFormScreen(
                     singleLine = true
                 )
 
+                OutlinedTextField(
+                    value = uiState.draftNote,
+                    onValueChange = viewModel::onNoteChange,
+                    label = { Text("Note (optional)") },
+                    placeholder = { Text("Any additional details...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 2,
+                    maxLines = 4
+                )
+
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
